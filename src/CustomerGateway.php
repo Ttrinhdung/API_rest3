@@ -32,6 +32,11 @@ class CustomerGateway
             return $this->conn->lastInsertId();
     }
 
+    /*
+     * Vérifier si l'adresse mail n'est pas deja utilisé dans la base de donnée
+     * Return True ou False
+     * @param array data
+     */
     public function checkEmailAvailable(array $data){
 
         $sql = "SELECT email FROM customer WHERE email=?";
