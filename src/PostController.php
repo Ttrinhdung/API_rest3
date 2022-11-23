@@ -120,6 +120,7 @@ class PostController
                 var_dump($all_widget_user);
                 return $all_widget_user;
 
+
             case "updateWidget":
                 $data =$_POST;
                 //J'affiche un message d'erreur si le domain ou le id_widget ne sont pas présent dans $data.
@@ -160,6 +161,8 @@ class PostController
                     "Hash valide ?"=>$isValid
                 ]);
                 return $isValid;
+
+
         }
     }
 
