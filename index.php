@@ -5,7 +5,7 @@ declare(strict_types=1);
 spl_autoload_register(function ($class){
     require __DIR__ . "/src/$class.php";
 });
-echo"test";
+
 
 // Je charge mon fichier .env contenant les données sensibles
 require 'vendor/autoload.php';
