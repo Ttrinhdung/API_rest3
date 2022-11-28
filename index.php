@@ -1,10 +1,31 @@
 <?php
 
 declare(strict_types=1);
+// Je require mes class
 spl_autoload_register(function ($class){
     require __DIR__ . "/src/$class.php";
 });
+
+// Je charge mon fichier .env contenant les données sensibles
+require 'vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 header("Content-type: application/json; charset=UTF-8");
+
+// Je vérifie si le username et le password sont fournis.
+if (!isset($_SERVER['PHP_AUTH_USER']) OR !isset($_SERVER['PHP_AUTH_PW'])) {
+    header('HTTP/1.0 401 Unauthorized');
+    echo 'Access denied. Username or password are missing.';
+    exit;
+}
+// Si oui, je vérifie la validité du password.
+if ($_SERVER['PHP_AUTH_PW'] == $_ENV['Authentification_password']) {
+    echo 'Access granted.';
+} else {
+    echo 'Access denied! Wrong password.';
+    exit;
+}
 
 $uri =explode("/",$_SERVER["REQUEST_URI"]);
 
@@ -17,6 +38,7 @@ $id_widget = null;
 if(isset($_POST['id_widget'])){
     $id_widget=(int)$_POST['id_widget'];
 }
+
 $db = new Database("localhost","API rest","root","root");
 
 //Selon l'URL j'effectue une action POST

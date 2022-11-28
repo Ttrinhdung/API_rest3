@@ -43,8 +43,7 @@ class CustomerGateway
         $statement = $this->conn->prepare($sql);
         $statement->execute(array($data['email']));
 
-        $is_email_availabe = $statement->fetch(PDO::FETCH_ASSOC);
-        return $is_email_availabe;
+        return $statement->fetch(PDO::FETCH_ASSOC);
     }
 
 

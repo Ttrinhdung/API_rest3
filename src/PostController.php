@@ -23,14 +23,14 @@ class PostController
         switch ($action) {
             case "register":
                 $data = $_POST;
-                $data["password"]=md5($data['password']);
+
 
                 //J'affiche un message d'erreur si le nom,prenom,password ou email n'est pas présent dans $data.
                 $errors = $this->getValidationErrorsRegister($data);
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>$errors
+                        "error(s)"=>$errors
                     ]);
                     break;
                 }
@@ -39,12 +39,14 @@ class PostController
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>"Email is already taken"
+                        "error(s)"=>"Email is already taken"
                     ]);
                     break;
                 }
 
+
                 //Je créer un customer dans la bdd avec les données récupere dans $data.
+                $data["password"]=md5($data['password']);
                 $id=$this->customerGateway->registerCustomer($data);
 
                 echo json_encode([
@@ -61,7 +63,7 @@ class PostController
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>$errors
+                        "error(s)"=>$errors
                     ]);
                     break;
                 }
@@ -89,7 +91,17 @@ class PostController
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>$errors
+                        "error(s)"=>$errors
+                    ]);
+                    break;
+                }
+
+                //Je check si le domain est disponible
+                $errors = $this->widgetGateway->checkDomainAvailable($data);
+                if(!empty($errors)){
+                    http_response_code(422);
+                    echo json_encode([
+                        "error(s)"=>"Domain is already taken"
                     ]);
                     break;
                 }
@@ -114,6 +126,17 @@ class PostController
                 break;
 
             case "getWidget":
+                $data=$_POST;
+                //J'affiche un message d'erreur si l'id_user n'est pas présent dans $data.
+                $errors = $this->getValidationErrorsGetWidget($data);
+
+                if(!empty($errors)){
+                    http_response_code(422);
+                    echo json_encode([
+                        "errors"=>$errors
+                    ]);
+                    break;
+                }
 
                 //Recupère tout les widget d'un client
                 $all_widget_user= $this->widgetGateway->recupAllWidgetFromCustomer($id_user);
@@ -128,7 +151,7 @@ class PostController
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>$errors
+                        "error(s)"=>$errors
                     ]);
                     break;
                 }
@@ -150,7 +173,7 @@ class PostController
                 if(!empty($errors)){
                     http_response_code(422);
                     echo json_encode([
-                        "errors"=>$errors
+                        "error(s)"=>$errors
                     ]);
                     break;
                 }
@@ -170,7 +193,7 @@ class PostController
     * Renvoi un message d'érreur si des données sont manquantes
     * @param array data
     */
-    private function getValidationErrorsLogin(array $data){
+    private     function getValidationErrorsLogin(array $data){
         $errors=[];
 
         if(empty($data['email'])){
@@ -220,6 +243,20 @@ class PostController
         if(empty($data['domain'])){
             $errors[]= 'Domain required';
         }
+        return $errors;
+    }
+
+    /*
+    * Renvoi un message d'érreur si des données sont manquantes
+    * @param array data
+    */
+    private     function getValidationErrorsGetWidget(array $data){
+        $errors=[];
+
+        if(empty($data['id_user'])){
+            $errors[]= 'Id user required';
+        }
+
         return $errors;
     }
     /*

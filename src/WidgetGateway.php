@@ -20,6 +20,19 @@ class WidgetGateway
 
         return $this->conn->lastInsertId();
     }
+    /*
+     * Vérifier si le domain n'est pas deja utilisé dans la base de donnée
+     * Return le nom de domain si le domain existe deja  sinon return false
+     * @param array data
+     */
+    public function checkDomainAvailable(array $data){
+
+        $sql = "SELECT domain FROM widget WHERE domain=?";
+        $statement = $this->conn->prepare($sql);
+        $statement->execute(array($data['domain']));
+
+        return $statement->fetch(PDO::FETCH_ASSOC);
+    }
 
     /*
      * Renvoi le hash du widget donné en paramètre.
