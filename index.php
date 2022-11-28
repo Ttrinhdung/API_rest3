@@ -5,6 +5,7 @@ declare(strict_types=1);
 spl_autoload_register(function ($class){
     require __DIR__ . "/src/$class.php";
 });
+echo"test";
 
 // Je charge mon fichier .env contenant les données sensibles
 require 'vendor/autoload.php';
@@ -20,7 +21,7 @@ if (!isset($_SERVER['PHP_AUTH_USER']) OR !isset($_SERVER['PHP_AUTH_PW'])) {
     exit;
 }
 // Si oui, je vérifie la validité du password.
-if ($_SERVER['PHP_AUTH_PW'] == $_ENV['Authentification_password']) {
+if ($_SERVER['PHP_AUTH_PW'] == $_ENV['AUTHENTIFICATION_PASSWORD']) {
     echo 'Access granted.';
 } else {
     echo 'Access denied! Wrong password.';
