@@ -33,8 +33,8 @@ class CustomerGateway
     }
 
     /*
-     * Vérifier si l'adresse mail n'est pas deja utilisé dans la base de donnée
-     * Return True ou False
+     * Vérifier si l'adresse mail n'est pas déjà utilisée dans la base de données.
+     * Return True si l'adresse est disponible sinon affiche un message d'erreur.
      * @param array data
      */
     public function checkEmailAvailable(array $data){
@@ -43,12 +43,20 @@ class CustomerGateway
         $statement = $this->conn->prepare($sql);
         $statement->execute(array($data['email']));
 
-        return $statement->fetch(PDO::FETCH_ASSOC);
+        $errors= $statement->fetch(PDO::FETCH_ASSOC);
+        if(!empty($errors)){
+            http_response_code(422);
+            echo json_encode([
+                "error(s)"=>"Email is already taken"
+            ]);
+            exit;
+        }
+        return true;
     }
 
 
     /*
-     * Vérifie dans la bdd si l'email et le password récupérer dans le $_POST corresponde a un customer.
+     * Vérifie dans la bdd si l'email et le password récupéré dans le $_POST correspond a un customer.
      * Si oui return l'id de l'utilisateur, Sinon false.
      * @param array data
      */

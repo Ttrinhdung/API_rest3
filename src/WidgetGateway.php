@@ -10,19 +10,18 @@ class WidgetGateway
     /*
      * Créer un widget dans la table widget.
      * @param array data
-     * @param $id_user
      */
-    public function addWidget(array $data,int $id_user){
+    public function addWidget(array $data){
 
-        $sql="INSERT INTO widget(id_user,domain,hash) VALUES ($id_user,?,?)";
+        $sql="INSERT INTO widget(id_user,domain,hash) VALUES (?,?,?)";
         $statement = $this->conn->prepare($sql);
-        $statement->execute(array($data['domain'],$data['hash']));
+        $statement->execute(array($data['id_user'],$data['domain'],$data['hash']));
 
         return $this->conn->lastInsertId();
     }
     /*
-     * Vérifier si le domain n'est pas deja utilisé dans la base de donnée
-     * Return le nom de domain si le domain existe deja  sinon return false
+     * Vérifie si le domain n'est pas deja utilisé dans la base de données
+     * Return un message d'erreur si le domain existe déjà  sinon return true
      * @param array data
      */
     public function checkDomainAvailable(array $data){
@@ -31,18 +30,26 @@ class WidgetGateway
         $statement = $this->conn->prepare($sql);
         $statement->execute(array($data['domain']));
 
-        return $statement->fetch(PDO::FETCH_ASSOC);
+        $errors=$statement->fetch(PDO::FETCH_ASSOC);
+        if(!empty($errors)){
+            http_response_code(422);
+            echo json_encode([
+                "error(s)"=>"Domain is already taken"
+            ]);
+            exit;
+        }
+        return true;
     }
 
     /*
      * Renvoi le hash du widget donné en paramètre.
-     * @param id_user
-     * @param id_widget
+     * @param $data
+     * @param $id_widget_added
      */
-    public function recupHash(int $id_user,int $id_widget){
+    public function recupHash(array $data,int $id_widget_added){
         $sql="SELECT hash FROM widget WHERE id_user = ? AND id=?";
         $statement = $this->conn->prepare($sql);
-        $statement->execute(array($id_user,$id_widget));
+        $statement->execute(array($data['id_user'],$id_widget_added));
 
         $hash = $statement->fetch(PDO::FETCH_ASSOC);
         return $hash;
@@ -50,12 +57,12 @@ class WidgetGateway
 
     /*
      * Renvoi un tableau de tout les widgets de l'utilisateur donné en paramètre.
-     * @param id_user
+     * @param $data
      */
-    public function recupAllWidgetFromCustomer(int $id_user){
-        $sql="SELECT widget.id_user,id,domain,hash FROM widget INNER JOIN customer ON widget.id_user =customer.id_user WHERE widget.id_user=$id_user";
+    public function recupAllWidgetFromCustomer(array $data){
+        $sql="SELECT widget.id_user,id,domain,hash FROM widget INNER JOIN customer ON widget.id_user =customer.id_user WHERE widget.id_user=?";
         $statement = $this->conn->prepare($sql);
-        $statement->execute();
+        $statement->execute(array($data['id_user']));
         $data = [];
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)){
             $data[]=$row;
@@ -64,14 +71,36 @@ class WidgetGateway
     }
 
     /*
+     * Vérifie si le user_id est présent dans la base de données
+     * Return un message d'erreur si l'id_user n'existe pas sinon return true
+     * @param array data
+     */
+    public function checkIdUserExist(array $data){
+        $sql="SELECT id_user FROM customer WHERE id_user=?";
+
+        $statement = $this->conn->prepare($sql);
+        $statement->execute(array($data['id_user']));
+
+        $errors = $statement->fetch(PDO::FETCH_ASSOC);
+        $errors=$statement->fetch(PDO::FETCH_ASSOC);
+        if(empty($errors)){
+            http_response_code(422);
+            echo json_encode([
+                "error(s)"=>"Id_user does not exist"
+            ]);
+            exit;
+        }
+        return true;
+    }
+    /*
      * Met a jour le domain du widget donné en paramètre
      * @param array data
      * @param $id_widget
      */
-    public function updateWidget(array $data,int $id_widget){
-        $sql="UPDATE widget SET domain=? WHERE id=$id_widget";
+    public function updateWidget(array $data){
+        $sql="UPDATE widget SET domain=? WHERE id=?";
         $statement = $this->conn->prepare($sql);
-        $statement->execute(array($data["domain"]));
+        $statement->execute(array($data["domain"],$data['id_widget']));
     }
 
     /*
