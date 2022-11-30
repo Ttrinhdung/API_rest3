@@ -47,7 +47,7 @@ class WidgetGateway
      * @param $id_widget_added
      */
     public function recupHash(array $data,int $id_widget_added){
-        $sql="SELECT hash FROM widget WHERE id_user = ? AND id=?";
+        $sql="SELECT hash FROM widget WHERE id_user = ? AND id=$id_widget_added";
         $statement = $this->conn->prepare($sql);
         $statement->execute(array($data['id_user'],$id_widget_added));
 
@@ -70,28 +70,7 @@ class WidgetGateway
         return $data;
     }
 
-    /*
-     * Vérifie si le user_id est présent dans la base de données
-     * Return un message d'erreur si l'id_user n'existe pas sinon return true
-     * @param array data
-     */
-    public function checkIdUserExist(array $data){
-        $sql="SELECT id_user FROM customer WHERE id_user=?";
 
-        $statement = $this->conn->prepare($sql);
-        $statement->execute(array($data['id_user']));
-
-        $errors = $statement->fetch(PDO::FETCH_ASSOC);
-        $errors=$statement->fetch(PDO::FETCH_ASSOC);
-        if(empty($errors)){
-            http_response_code(422);
-            echo json_encode([
-                "error(s)"=>"Id_user does not exist"
-            ]);
-            exit;
-        }
-        return true;
-    }
     /*
      * Met a jour le domain du widget donné en paramètre
      * @param array data
@@ -134,6 +113,29 @@ class WidgetGateway
             $isValid=True;
         }
         return $isValid;
+    }
+
+    /*
+    * Vérifie si le user_id est présent dans la base de données
+    * Return un message d'erreur si l'id_widget n'existe pas sinon return true
+    * @param array data
+    */
+    public function checkIdWidgetExist(array $data){
+
+        $sql="SELECT id FROM widget WHERE id=?";
+
+        $statement = $this->conn->prepare($sql);
+        $statement->execute(array($data['id_widget']));
+
+        $errors=$statement->fetch(PDO::FETCH_ASSOC);
+        if(empty($errors)){
+            http_response_code(422);
+            echo json_encode([
+                "error(s)"=>"Id_widget does not exist"
+            ]);
+            exit;
+        }
+        return true;
     }
 
 }

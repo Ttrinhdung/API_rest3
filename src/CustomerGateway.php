@@ -70,4 +70,26 @@ class CustomerGateway
         return $id;
 
     }
+
+    /*
+     * Vérifie si le user_id est présent dans la base de données
+     * Return un message d'erreur si l'id_user n'existe pas sinon return true
+     * @param array data
+     */
+    public function checkIdUserExist(array $data){
+        $sql="SELECT id_user FROM customer WHERE id_user=?";
+
+        $statement = $this->conn->prepare($sql);
+        $statement->execute(array($data['id_user']));
+
+        $errors=$statement->fetch(PDO::FETCH_ASSOC);
+        if(empty($errors)){
+            http_response_code(422);
+            echo json_encode([
+                "error(s)"=>"Id_user does not exist"
+            ]);
+            exit;
+        }
+        return true;
+    }
 }

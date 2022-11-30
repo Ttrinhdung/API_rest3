@@ -233,7 +233,7 @@ class PostController
         $this->widgetGateway->checkDomainAvailable($data);
 
         //Je check si l'Id_user existe dans la base de données.
-        $this->widgetGateway->checkIdUserExist($data);
+        $this->customerGateway->checkIdUserExist($data);
 
         //Je génère une clé hash de 10caractères pour la création de mon widget.
         $data["hash"]=$this->widgetGateway->genererChaineAleatoire(10);
@@ -241,8 +241,7 @@ class PostController
         //Je créer un widget et retourne l'id et le hash.
         $id_widget_added = $this->widgetGateway->addWidget($data);
 
-        $hash = $this->widgetGateway->recupHash($data,$id_widget_added);
-        $id_hash = ["id"=>$id_widget_added,"hash"=>$hash];
+        $id_hash = ["id"=>$id_widget_added,"hash"=>$data["hash"]];
 
         if($id_hash){
             echo json_encode([
@@ -263,6 +262,9 @@ class PostController
         //J'affiche un message d'erreur si l'id_user n'est pas présent dans $data.
         $this->getValidationErrorsGetWidget($data);
 
+        //Je vérifie que l'utilisateur existe dans la base de données
+        $this->customerGateway->checkIdUserExist($data);
+
         //Récupère tout les widget d'un client
         $all_widget_user= $this->widgetGateway->recupAllWidgetFromCustomer($data);
         var_dump($all_widget_user);
@@ -280,6 +282,9 @@ class PostController
 
         //Je vérifie que le nouveau domain n'est pas deja utilisé
         $this->widgetGateway->checkDomainAvailable($data);
+
+        //je vérifie que l'id_widget existe dans la base de données
+        $this->widgetGateway->checkIdWidgetExist($data);
 
         //Je met a jour le domain du widget dans la bdd.
         $this->widgetGateway->updateWidget($data);
